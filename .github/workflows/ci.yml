@@ -46,19 +46,16 @@ jobs:
             -e WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }} \
             --name weather-app-container \
             weather-app
-          
-          # Wait for container to start
           sleep 5
         
       - name: Test running container
         run: |
-          # Test endpointu głównego
           curl -f http://localhost:3000/ || exit 1
 
       - name: Test endpoint with secret
         run: |
-          # Test endpointu pogody dla Zakopanego
-          response=$(curl http://localhost:3000/weather/Zakopane)
+          # Dodano -s aby nie śmiecić logów postępem downloadu
+          response=$(curl -s http://localhost:3000/weather/Zakopane)
           if [[ $response == *"tired"* ]]; then
             echo "Aplikacja jest zmęczona, szefie."
             exit 1
@@ -70,6 +67,7 @@ jobs:
 
   SBOM:
     name: Generate SBOM
+    needs: build # SBOM generujemy dla przetestowanego kodu
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
