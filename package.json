@@ -33,5 +33,17 @@
     "ts-jest": "^29.1.1",
     "@types/testing-library__dom": "^7.5.0",
     "coveralls": "^3.1.1"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "jsdom",
+    "coverageThreshold": {
+      "global": {
+        "branches": 0,
+        "functions": 0,
+        "lines": 0,
+        "statements": 0
+      }
+    }
   }
-} 
+}

@@ -38,7 +38,7 @@ jobs:
       
       - name: Build Docker image
         run: docker build -t weather-app .
-
+        
       - name: Run Docker container
         run: |
           docker run -d \
@@ -47,16 +47,40 @@ jobs:
             --name weather-app-container \
             weather-app
           sleep 5
-          
+        
       - name: Test running container
         run: |
           curl -f http://localhost:3000/ || exit 1
 
       - name: Test endpoint with secret
         run: |
+          # Dodano -s aby nie śmiecić logów postępem downloadu
           response=$(curl -s http://localhost:3000/weather/Zakopane)
-          echo "Response: $response"
           if [[ $response == *"tired"* ]]; then
             echo "Aplikacja jest zmęczona, szefie."
             exit 1
           fi
+        
+      - name: Cleanup
+        if: always()
+        run: docker rm -f weather-app-container 
+
+  SBOM:
+    name: Generate SBOM
+    needs: build # SBOM generujemy dla przetestowanego kodu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          format: spdx-json
+          output-file: sbom.json
+      
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+          retention-days: 1
